@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusHire</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --dark: #0f172a;
+      --bg-body: #f8fafc;
+      --border: #e2e8f0;
+      --text-gray: #64748b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'DM Sans', sans-serif; }
+    body {
+      background-color: var(--bg-body);
+      color: var(--dark);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 5%;
+      height: 70px;
+      background: rgba(255,255,255,0.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      flex-shrink: 0;
+      z-index: 1001;
+    }
+    .logo {
+      font-size: 1.4rem; font-weight: 800;
+      font-family: 'Sora', sans-serif;
+      color: var(--dark); cursor: pointer;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-group { display: flex; align-items: center; gap: 1rem; }
+    .hidden { display: none !important; }
+    .nav-link {
+      text-decoration: none; color: var(--text-gray);
+      font-weight: 500; font-size: 0.9rem;
+      transition: all 0.2s;
+      cursor: pointer; padding: 8px 16px; border-radius: 50px;
+    }
+    .nav-link:hover { color: var(--primary); background: #eff6ff; }
+    .nav-link.active { color: white; background: var(--dark); }
+    .user-profile-container {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; padding: 5px 10px;
+      border-radius: 8px; transition: 0.2s;
+      position: relative;
+    }
+    .user-profile-container:hover { background: #e2e8f0; }
+    .user-avatar {
+
+      width: 32px; height: 32px;
+      background: var(--dark); color: white;
+      border-radius: 0%;
+      display: flex; justify-content: center; align-items: center;
+      font-weight: 600; font-size: 0.85rem;
+      overflow: hidden;
+      border: 2px solid var(--border);
+    }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-dropdown {
+      position: absolute; top: 75px; right: 5%;
+      background: white; width: 220px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: 12px; border: 1px solid var(--border);
+      padding: 6px; display: none;
+      flex-direction: column; z-index: 2000;
+    }
+    .dropdown-item { padding:10px; cursor:pointer; border-radius:6px; font-size:0.9rem; display:flex; align-items:center; gap:10px; }
+    .dropdown-item:hover { background: #f8fafc; color: var(--primary); }
+    .dropdown-item.danger { color: var(--danger); border-top: 1px solid var(--border); margin-top:5px; }
+    .dropdown-item.danger:hover { background: #fef2f2; }
+    .btn-login { color: var(--dark); font-weight: 600; cursor: pointer; }
+    .btn-signup { background: var(--dark); color: white; padding: 0.5rem 1.2rem; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; }
+    .main-wrapper { flex: 1; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+    .view-section { display: none; padding: 2rem 5%; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.4s ease; }
+    .view-section.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero {
+      background: var(--dark);
+      color: white;
+      padding: 5rem 2rem; text-align: center;
+      border-radius: 0 0 24px 24px;
+      margin-bottom: 3rem;
+    }
+    .search-box { background: white; max-width: 600px; margin: 2rem auto; padding: 0.5rem; border-radius: 50px; display: flex; }
+    .search-box input { flex: 1; padding: 0 1.5rem; border: none; outline: none; }
+    .browse-layout {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      gap: 24px; max-width: 1200px; margin: 0 auto;
+    }
+    .filter-sidebar {
+      background: white; border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px;
+      box-shadow: var(--shadow); height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+    .filter-sidebar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+    .filter-sidebar-header h3 { font-family:'Sora',sans-serif; font-size:1rem; font-weight:700; }
+    .clear-all-btn { font-size:0.78rem; color:var(--primary); font-weight:600; cursor:pointer; background:none; border:none; padding:4px 8px; border-radius:6px; transition:0.2s; }
+    .clear-all-btn:hover { background: #eff6ff; }
+    .filter-group { margin-bottom:22px; padding-bottom:22px; border-bottom:1px solid var(--border); }
+    .filter-group:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+    .filter-group-label { font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-gray); margin-bottom:12px; }
+    .cat-pills { display:flex; flex-wrap:wrap; gap:8px; }
+    .cat-pill {
+      padding:6px 14px; border-radius:50px; border:1.5px solid var(--border);
+      font-size:0.8rem; font-weight:600; cursor:pointer; transition:all 0.2s;
+      background:white; color:var(--text-gray); display:flex; align-items:center; gap:6px;
+    }
+    .cat-pill:hover { border-color:var(--primary); color:var(--primary); background:#eff6ff; }
+    .cat-pill.active { background:var(--dark); color:white; border-color:var(--dark); }
+    .range-slider {
+      width:100%; -webkit-appearance:none; height:5px; border-radius:5px;
+      background: linear-gradient(to right, var(--primary) 70%, #e2e8f0 70%);
+      outline:none; cursor:pointer; margin:10px 0 8px;
+    }
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance:none; width:18px; height:18px;
+      background:white; border:2.5px solid var(--primary);
+      border-radius:50%; cursor:pointer; box-shadow:0 2px 6px rgba(37,99,235,0.3);
+    }
+    .range-labels { display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; color:var(--text-gray); }
+    .budget-value { font-size:0.85rem; font-weight:700; color:var(--primary); }
+    .check-filter-item { display:flex; align-items:center; gap:10px; padding:7px 0; cursor:pointer; font-size:0.85rem; font-weight:500; color:var(--dark); transition:0.15s; }
+    .check-filter-item:hover { color: var(--primary); }
+    .check-filter-item input[type="checkbox"] { width:16px; height:16px; accent-color:var(--primary); cursor:pointer; flex-shrink:0; }
+    .check-count { margin-left:auto; font-size:0.72rem; background:#f1f5f9; color:var(--text-gray); padding:2px 7px; border-radius:10px; font-weight:600; }
+    .sort-select { width:100%; padding:9px 12px; border-radius:8px; border:1.5px solid var(--border); font-size:0.85rem; font-weight:600; color:var(--dark); outline:none; cursor:pointer; background:white; transition:0.2s; }
+    .sort-select:focus { border-color:var(--primary); }
+    .results-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .results-count { font-size:0.9rem; font-weight:600; color:var(--text-gray); }
+    .results-count span { color:var(--dark); font-weight:800; }
+    .active-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .filter-tag {
+      display:flex; align-items:center; gap:6px;
+      background:#eff6ff; color:var(--primary);
+      border:1px solid #bfdbfe;
+      padding:4px 10px; border-radius:50px;
+      font-size:0.78rem; font-weight:600;
+      animation:fadeIn 0.2s ease;
+    }
+    .filter-tag button { background:none; border:none; color:var(--primary); cursor:pointer; font-size:0.7rem; padding:0; }
+    .job-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:20px; }
+    .job-card {
+      background:white; padding:1.5rem; border-radius:12px;
+      border:1px solid var(--border); transition:0.3s;
+      display:flex; flex-direction:column; justify-content:space-between;
+      box-shadow:var(--shadow); height:100%;
+      position:relative;
+    }
+    .job-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+      border-color: var(--primary);
+    }
+    .job-title { font-weight:700; font-size:1.1rem; font-family:'Sora',sans-serif; margin-bottom:0.3rem; }
+    .company-name { font-size:0.82rem; color:var(--text-gray); font-weight:600; margin-bottom:0.5rem; display:flex; align-items:center; gap:5px; }
+    .job-budget { color:var(--success); font-weight:700; background:#ecfdf5; padding:4px 12px; border-radius:6px; display:inline-block; font-size:0.85rem; margin-bottom:15px; }
+    .job-tag-list { margin-bottom:15px; }
+    .job-tag-list span { background:#f1f5f9; color:var(--text-gray); font-size:0.75rem; padding:4px 10px; border-radius:4px; margin-right:5px; margin-bottom:5px; display:inline-block; font-weight:600; }
+    .apply-btn { width:100%; padding:0.8rem; border:1px solid var(--border); color:var(--dark); background:white; border-radius:8px; cursor:pointer; font-weight:600; transition:0.2s; }
+    .apply-btn:hover { background:var(--dark); color:white; }
+    .apply-btn.applied { background:#dcfce7; border-color:#dcfce7; color:var(--success); cursor:default; }
+    .status-pill { position:absolute; top:15px; right:15px; font-size:0.65rem; font-weight:800; padding:4px 10px; border-radius:50px; text-transform:uppercase; }
+    .pill-pending { background:#fffbeb; color:#d97706; border:1px solid #fef3c7; }
+    .pill-interview { background:#eff6ff; color:#1d4ed8; border:1px solid #dbeafe; }
+    .dashboard-container { display:grid; grid-template-columns:1fr 350px; gap:30px; margin-top:30px; }
+    .card-panel { background:white; border:1px solid var(--border); border-radius:16px; padding:30px; box-shadow:var(--shadow); }
+    .progress-bar-container { width:100%; height:10px; background:#f1f5f9; border-radius:10px; margin:20px 0; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg, var(--primary), #60a5fa); width:65%; border-radius:10px; transition:width 1s ease-in-out; }
+    .big-avatar-circle { width:100px; height:100px; background:var(--dark); color:white; border-radius:0%; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:700; overflow:hidden; border:4px solid white; box-shadow:0 0 0 2px var(--primary); }
+    .big-avatar-circle img { width:100%; height:100%; object-fit:cover; }
+
+    /* ============ MODALS ============ */
+    .modal {
+      display:none;
+      position:fixed; inset:0;
+      background:rgba(15,23,42,0.6);
+      z-index:3000; justify-content:center; align-items:center;
+      backdrop-filter:blur(8px);
+    }
+    .modal-body { background:white; padding:3rem; border-radius:20px; width:95%; max-width:460px; text-align:center; position:relative; box-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25); }
+    .input-wrap { margin-bottom:18px; text-align:left; position:relative; }
+    .input-wrap label { display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; color:var(--text-gray); }
+    .input-wrap input { width:100%; padding:14px; border:1.5px solid var(--border); border-radius:10px; outline:none; transition:0.2s; font-size:1rem; }
+    .input-wrap input:focus { border-color:var(--primary); box-shadow:0 0 0 4px rgba(37,99,235,0.1); }
+    .input-wrap input.input-valid { border-color:var(--success); }
+    .input-wrap input.input-error { border-color:var(--danger); box-shadow:0 0 0 3px rgba(239,68,68,0.1); }
+    .field-error-msg { font-size:0.78rem; color:var(--danger); margin-top:5px; display:none; align-items:center; gap:4px; }
+    .field-error-msg.show { display:flex; }
+    .password-strength-wrap { margin-top:8px; display:none; }
+    .password-strength-wrap.show { display:block; }
+    .strength-bar-track { height:6px; background:#f1f5f9; border-radius:10px; overflow:hidden; margin-bottom:6px; }
+    .strength-bar-fill { height:100%; border-radius:10px; transition:width 0.4s ease, background 0.4s ease; width:0%; }
+    .strength-text { font-size:0.78rem; font-weight:600; }
+    .password-checklist { background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-top:8px; display:none; }
+    .password-checklist.show { display:block; }
+    .check-item { display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-gray); margin-bottom:5px; transition:color 0.2s; }
+    .check-item.pass { color:var(--success); }
+    .check-item.fail { color:var(--danger); }
+    .check-icon { font-size:0.7rem; width:16px; text-align:center; }
+    .email-status-icon { position:absolute; right:14px; top:40px; font-size:0.9rem; display:none; }
+    .eye-icon { position:absolute; right:15px; top:40px; cursor:pointer; color:var(--text-gray); transition:0.2s; }
+    .eye-icon:hover { color:var(--dark); }
+    .action-btn { width:100%; background:var(--dark); color:white; padding:15px; border:none; border-radius:10px; cursor:pointer; font-weight:700; font-size:1rem; margin-top:10px; transition:0.2s; font-family:'Sora',sans-serif; }
+    .action-btn:hover { background:#000; transform:translateY(-1px); }
+    .action-btn:disabled { background:#94a3b8; cursor:not-allowed; transform:none; }
+    .modal-footer-links { margin-top:20px; font-size:0.9rem; color:var(--text-gray); }
+    .link-text { color:var(--primary); text-decoration:none; font-weight:600; cursor:pointer; }
+    .link-text:hover { text-decoration:underline; }
+
+    /* ============ JOB DETAIL MODAL ============ */
+    #jobDetailModal .modal-body {
+      max-width: 580px;
+      text-align: left;
+      padding: 2.5rem;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .detail-header { margin-bottom: 1.5rem; }
+    .detail-title { font-family:'Sora',sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:0.3rem; }
+    .detail-company { font-size:0.88rem; color:var(--text-gray); font-weight:600; margin-bottom:0.8rem; display:flex; align-items:center; gap:5px; }
+    .detail-badges { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1rem; }
+    .detail-badge { font-size:0.75rem; font-weight:700; padding:4px 12px; border-radius:20px; }
+    .detail-budget-block { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border:1px solid #6ee7b7; border-radius:12px; padding:16px 20px; margin-bottom:1.5rem; display:flex; align-items:center; gap:12px; }
+    .detail-budget-amount { font-size:1.8rem; font-weight:800; color:#065f46; font-family:'Sora',sans-serif; }
+    .detail-budget-label { font-size:0.85rem; color:#047857; font-weight:600; }
+    .detail-section { margin-bottom:1.5rem; }
+    .detail-section-title { font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-gray); margin-bottom:10px; }
+    .detail-desc { font-size:0.95rem; line-height:1.7; color:#334155; }
+    .detail-tags { display:flex; flex-wrap:wrap; gap:8px; }
+    .detail-tag { background:#f1f5f9; color:var(--dark); font-size:0.8rem; font-weight:600; padding:6px 14px; border-radius:8px; border:1px solid var(--border); }
+    .detail-actions { display:flex; gap:12px; margin-top:1.5rem; }
+    .detail-apply-btn { flex:1; padding:14px; background:var(--dark); color:white; border:none; border-radius:10px; font-weight:700; font-size:1rem; cursor:pointer; font-family:'Sora',sans-serif; transition:0.2s; }
+    .detail-apply-btn:hover { background:#000; transform:translateY(-1px); }
+    .detail-apply-btn.applied { background:#dcfce7; border:1.5px solid #6ee7b7; color:var(--success); cursor:default; transform:none; }
+    .detail-close-btn { padding:14px 20px; border:1.5px solid var(--border); background:white; border-radius:10px; font-weight:600; cursor:pointer; transition:0.2s; color:var(--text-gray); }
+    .detail-close-btn:hover { background:#f1f5f9; }
+    .detail-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .detail-info-item { background:#f8fafc; border-radius:10px; padding:14px; border:1px solid var(--border); }
+    .detail-info-key { font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-gray); margin-bottom:4px; }
+    .detail-info-val { font-size:0.95rem; font-weight:700; color:var(--dark); }
+
+    .toast {
+      position:fixed; bottom:30px; left:50%;
+      transform:translateX(-50%) translateY(80px);
+      background:var(--dark); color:white; padding:14px 24px;
+      border-radius:50px; font-weight:600; font-size:0.9rem;
+      z-index:9999; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      white-space:nowrap;
+    }
+    .toast.success-toast { background:var(--success); }
+    .toast.error-toast { background:var(--danger); }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    @media (max-width: 900px) {
+      .browse-layout { grid-template-columns: 1fr; }
+      .filter-sidebar { position: static; }
+    }
+    @media (max-width: 768px) {
+      .dashboard-container { grid-template-columns: 1fr; }
+      .navbar { padding: 0 1rem; }
+      .logo span { display: none; }
+      .detail-info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <nav class="navbar">
+    <div class="logo" onclick="handleNavigation('home')">
+      <div style="width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;">
+        <i class="fas fa-layer-group"></i>
+      </div>
+      <span>NexusHire</span>
+    </div>
+    <div class="nav-group" id="nav-guest">
+      <a onclick="openModal('login')" class="btn-login">Log In</a>
+      <button onclick="openModal('signup')" class="btn-signup">Sign Up</button>
+    </div>
+    <div class="nav-group hidden" id="nav-user">
+      <a onclick="handleNavigation('home')" class="nav-link active"><i class="fas fa-home" style="margin-right:5px;"></i>Home</a>
+      <a onclick="handleNavigation('dashboard')" class="nav-link"><i class="fas fa-user" style="margin-right:5px;"></i>Profile</a>
+      <a onclick="handleNavigation('myjobs')" class="nav-link">
+        <i class="fas fa-file-alt" style="margin-right:5px;"></i>My Applications
+        <span id="badge" style="background:var(--primary);color:white;padding:2px 7px;border-radius:12px;font-size:0.7rem;margin-left:5px;">0</span>
+      </a>
+      <div class="user-profile-container" onclick="toggleDropdown(event)">
+        <div class="user-avatar" id="nav-profile-pic">U</div>
+        <span id="display-name" style="font-weight:600;font-size:0.9rem;">User</span>
+        <i class="fas fa-chevron-down" style="font-size:0.7rem;color:var(--text-gray);"></i>
+        <div id="profile-dropdown" class="profile-dropdown">
+          <div class="dropdown-item" onclick="handleNavigation('dashboard')"><i class="fas fa-user-circle"></i> Profile</div>
+          <div class="dropdown-item" onclick="handleNavigation('myjobs')"><i class="fas fa-briefcase"></i> My Applications</div>
+          <div class="dropdown-item danger" onclick="processLogout()"><i class="fas fa-sign-out-alt"></i> Log Out</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-wrapper" onclick="hideDropdowns()">
+    <!-- HOME / BROWSE -->
+    <section id="view-home" class="view-section active">
+      <div class="hero">
+        <h1 style="font-size:2.5rem;margin-bottom:10px;font-family:'Sora',sans-serif;">Find your Web Development Job</h1>
+        <p style="opacity:0.8;">Browse real-world job openings from top companies across India</p>
+        <div class="search-box">
+          <input type="text" id="search-bar" onkeyup="filterJobs()" placeholder="Search job title, skills or company...">
+          <button onclick="filterJobs()" style="background:var(--primary);color:white;border:none;padding:0.8rem 2.5rem;border-radius:50px;font-weight:700;cursor:pointer;">Search</button>
+        </div>
+      </div>
+      <div class="browse-layout">
+        <aside class="filter-sidebar">
+          <div class="filter-sidebar-header">
+            <h3><i class="fas fa-sliders-h" style="margin-right:8px;color:var(--primary);"></i>Filters</h3>
+            <button class="clear-all-btn" onclick="clearAllFilters()">Clear All</button>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-label">💼 Job Type</div>
+            <div class="cat-pills">
+              <button class="cat-pill active" data-role="all" onclick="setRoleFilter(this)"><i class="fas fa-th-large"></i> All</button>
+              <button class="cat-pill" data-role="Frontend" onclick="setRoleFilter(this)"><i class="fas fa-laptop-code"></i> Frontend</button>
+              <button class="cat-pill" data-role="Backend" onclick="setRoleFilter(this)"><i class="fas fa-server"></i> Backend</button>
+              <button class="cat-pill" data-role="Government" onclick="setRoleFilter(this)"><i class="fas fa-landmark"></i> Govt / Public</button>
+              <button class="cat-pill" data-role="Healthcare" onclick="setRoleFilter(this)"><i class="fas fa-heartbeat"></i> Healthcare</button>
+              <button class="cat-pill" data-role="Finance" onclick="setRoleFilter(this)"><i class="fas fa-chart-line"></i> Finance</button>
+              <button class="cat-pill" data-role="Management" onclick="setRoleFilter(this)"><i class="fas fa-briefcase"></i> Management</button>
+              <button class="cat-pill" data-role="Agriculture" onclick="setRoleFilter(this)"><i class="fas fa-seedling"></i> Agriculture</button>
+              <button class="cat-pill" data-role="Education" onclick="setRoleFilter(this)"><i class="fas fa-graduation-cap"></i> Education</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-label">🕐 Employment Type</div>
+            <label class="check-filter-item">
+              <input type="checkbox" value="FullTime" onchange="filterJobs()" class="schedule-filter">
+              <i class="fas fa-briefcase" style="color:var(--primary);width:16px;"></i> Full Time
+            </label>
+            <label class="check-filter-item">
+              <input type="checkbox" value="PartTime" onchange="filterJobs()" class="schedule-filter">
+              <i class="fas fa-clock" style="color:var(--warning);width:16px;"></i> Part Time
+            </label>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-label">💰 Salary Type</div>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Fixed" onchange="filterJobs()" class="type-filter"> Fixed Salary <span class="check-count">9</span>
+            </label>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Hourly" onchange="filterJobs()" class="type-filter"> Hourly Rate <span class="check-count">3</span>
+            </label>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Contract" onchange="filterJobs()" class="type-filter"> Contract <span class="check-count">5</span>
+            </label>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-label">🎓 Experience Level</div>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Junior" onchange="filterJobs()" class="level-filter"> Junior (0–2 yrs) <span class="check-count">5</span>
+            </label>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Mid" onchange="filterJobs()" class="level-filter"> Mid-Level (3–5 yrs) <span class="check-count">10</span>
+            </label>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Senior" onchange="filterJobs()" class="level-filter"> Senior (6+ yrs) <span class="check-count">6</span>
+            </label>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-label">💵 Salary Range (₹/month)</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:0.82rem;color:var(--text-gray);">Up to:</span>
+              <span class="budget-value" id="budget-display">Any</span>
+            </div>
+            <input type="range" class="range-slider" id="budget-slider" min="15000" max="120000" step="5000" value="120000" oninput="updateBudgetSlider(this)" onchange="filterJobs()">
+            <div class="range-labels"><span>₹15K</span><span>₹1.2L</span></div>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-label">🌍 Work Mode</div>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Remote" onchange="filterJobs()" class="mode-filter">
+              <i class="fas fa-globe" style="color:var(--primary);width:16px;"></i> Remote
+            </label>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Hybrid" onchange="filterJobs()" class="mode-filter">
+              <i class="fas fa-building" style="color:var(--warning);width:16px;"></i> Hybrid
+            </label>
+            <label class="check-filter-item">
+              <input type="checkbox" value="Onsite" onchange="filterJobs()" class="mode-filter">
+              <i class="fas fa-map-marker-alt" style="color:var(--danger);width:16px;"></i> On-site
+            </label>
+          </div>
+          <div class="filter-group">
+            <div class="filter-group-label">🔃 Sort By</div>
+            <select class="sort-select" id="sort-select" onchange="filterJobs()">
+              <option value="default">Most Relevant</option>
+              <option value="budget-high">Salary: High to Low</option>
+              <option value="budget-low">Salary: Low to High</option>
+              <option value="newest">Newest First</option>
+            </select>
+          </div>
+        </aside>
+        <div>
+          <div class="active-filters" id="active-filter-tags"></div>
+          <div class="results-bar">
+            <p class="results-count"><span id="results-num">0</span> jobs found</p>
+          </div>
+          <div id="job-container" class="job-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view-section">
+      <div style="margin-bottom:30px;">
+        <h2 style="font-size:2rem;font-family:'Sora',sans-serif;">Welcome back, <span id="welcome-name" style="color:var(--primary);">User</span>!</h2>
+        <p style="color:var(--text-gray);">Here is what is happening with your profile today.</p>
+      </div>
+      <div class="dashboard-container">
+        <div class="card-panel">
+          <h3 style="margin-bottom:10px;">Profile Completion</h3>
+          <p style="font-size:0.9rem;color:var(--text-gray);">Complete your profile to unlock all job listings.</p>
+          <div class="progress-bar-container"><div class="progress-fill"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.85rem;font-weight:600;">
+            <span>Progress: 65%</span><span>Next: Top Rated Plus</span>
+          </div>
+          <hr style="margin:30px 0;border:0;border-top:1px solid var(--border);">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div style="background:var(--bg-body);padding:20px;border-radius:12px;">
+              <h4 style="font-size:0.8rem;text-transform:uppercase;color:var(--text-gray);">Profile Views</h4>
+              <p style="font-size:1.5rem;font-weight:800;">1,248</p>
+            </div>
+            <div style="background:var(--bg-body);padding:20px;border-radius:12px;">
+              <h4 style="font-size:0.8rem;text-transform:uppercase;color:var(--text-gray);">Search Appearances</h4>
+              <p style="font-size:1.5rem;font-weight:800;">432</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-panel" style="text-align:center;">
+          <h3 style="margin-bottom:20px;">Your Profile Photo</h3>
+          <div class="big-avatar-circle" id="dashboard-big-avatar">U</div>
+          <p style="font-size:0.85rem;color:var(--text-gray);margin-bottom:20px;">Upload a photo to increase your hire rate by 3x.</p>
+          <input type="file" id="file-uploader" accept="image/*" hidden onchange="processImageUpload(event)">
+          <button class="action-btn" onclick="document.getElementById('file-uploader').click()" style="background:white;color:var(--dark);border:2px solid var(--border);">
+            <i class="fas fa-camera" style="margin-right:8px;"></i> Upload New Photo
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY JOBS -->
+    <section id="view-myjobs" class="view-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+        <div>
+          <h2 style="font-size:1.8rem;font-family:'Sora',sans-serif;">Track Applications</h2>
+          <p style="color:var(--text-gray);">Manage and monitor your submitted applications.</p>
+        </div>
+        <div style="background:white;padding:10px 20px;border-radius:10px;border:1px solid var(--border);">
+          <span style="font-weight:700;color:var(--primary);" id="total-applied-count">0</span> Applications
+        </div>
+      </div>
+      <div id="applied-jobs-grid" class="job-grid"></div>
+    </section>
+  </div>
+
+  <!-- ===================== AUTH MODAL ===================== -->
+  <div id="authModal" class="modal">
+    <div class="modal-body">
+      <span style="position:absolute;top:25px;right:25px;cursor:pointer;font-size:1.2rem;color:var(--text-gray);" onclick="closeModal()">
+        <i class="fas fa-times"></i>
+      </span>
+
+      <!-- LOGIN -->
+      <div id="view-modal-login">
+        <h2 style="font-size:1.8rem;margin-bottom:10px;font-family:'Sora',sans-serif;">Welcome Back</h2>
+        <p style="color:var(--text-gray);margin-bottom:30px;">Login to access your workspace.</p>
+        <div class="input-wrap">
+          <label>Email Address</label>
+          <input type="email" id="input-login-email" placeholder="name@company.com" oninput="validateLoginEmail()">
+          <i class="email-status-icon" id="login-email-icon"></i>
+          <div class="field-error-msg" id="login-email-err">
+            <i class="fas fa-exclamation-circle"></i> <span id="login-email-err-text"></span>
+          </div>
+        </div>
+        <div class="input-wrap">
+          <label>Password</label>
+          <input type="password" id="input-login-pass" placeholder="Enter your password" oninput="validateLoginPassword()">
+          <i class="fas fa-eye eye-icon" onclick="togglePasswordVisibility('input-login-pass')"></i>
+          <div class="password-strength-wrap" id="login-strength-wrap">
+            <div class="strength-bar-track"><div class="strength-bar-fill" id="login-strength-bar"></div></div>
+            <span class="strength-text" id="login-strength-text"></span>
+          </div>
+          <div class="password-checklist" id="login-pass-checklist">
+            <div class="check-item" id="l-chk-len"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 8 characters</div>
+            <div class="check-item" id="l-chk-upper"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 1 Uppercase letter (A–Z)</div>
+            <div class="check-item" id="l-chk-lower"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 1 Lowercase letter (a–z)</div>
+            <div class="check-item" id="l-chk-num"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 1 Number (0–9)</div>
+            <div class="check-item" id="l-chk-special"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 1 Special character (!@#$...)</div>
+          </div>
+          <div class="field-error-msg" id="login-pass-err">
+            <i class="fas fa-exclamation-circle"></i> <span id="login-pass-err-text"></span>
+          </div>
+        </div>
+        <button class="action-btn" onclick="executeAuthentication('login')">Sign In</button>
+        <div class="modal-footer-links">
+          <p><a class="link-text" onclick="switchModalUI('forgot')">Forgot Password?</a></p>
+          <p style="margin-top:15px;">New here? <a class="link-text" onclick="switchModalUI('signup')">Create an account</a></p>
+        </div>
+      </div>
+
+      <!-- SIGNUP -->
+      <div id="view-modal-signup" class="hidden">
+        <h2 style="font-size:1.8rem;margin-bottom:10px;font-family:'Sora',sans-serif;">Create Account</h2>
+        <p style="color:var(--text-gray);margin-bottom:30px;">Join the web development community.</p>
+        <div class="input-wrap">
+          <label>Full Name</label>
+          <input type="text" id="input-signup-name" placeholder="John Doe" oninput="validateSignupName()">
+          <div class="field-error-msg" id="signup-name-err">
+            <i class="fas fa-exclamation-circle"></i> <span id="signup-name-err-text"></span>
+          </div>
+        </div>
+        <div class="input-wrap">
+          <label>Work Email</label>
+          <input type="email" id="input-signup-email" placeholder="john@company.com" oninput="validateSignupEmail()">
+          <i class="email-status-icon" id="signup-email-icon"></i>
+          <div class="field-error-msg" id="signup-email-err">
+            <i class="fas fa-exclamation-circle"></i> <span id="signup-email-err-text"></span>
+          </div>
+        </div>
+        <div class="input-wrap">
+          <label>Create Password</label>
+          <input type="password" id="input-signup-pass" placeholder="At least 8 characters" oninput="validateSignupPassword()">
+          <i class="fas fa-eye eye-icon" onclick="togglePasswordVisibility('input-signup-pass')"></i>
+          <div class="password-strength-wrap" id="strength-wrap">
+            <div class="strength-bar-track"><div class="strength-bar-fill" id="strength-bar"></div></div>
+            <span class="strength-text" id="strength-text"></span>
+          </div>
+          <div class="password-checklist" id="pass-checklist">
+            <div class="check-item" id="chk-len"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 8 characters</div>
+            <div class="check-item" id="chk-upper"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 1 Uppercase letter (A–Z)</div>
+            <div class="check-item" id="chk-lower"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 1 Lowercase letter (a–z)</div>
+            <div class="check-item" id="chk-num"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 1 Number (0–9)</div>
+            <div class="check-item" id="chk-special"><span class="check-icon"><i class="fas fa-circle"></i></span> At least 1 Special character (!@#$...)</div>
+          </div>
+        </div>
+        <div class="input-wrap">
+          <label>Confirm Password</label>
+          <input type="password" id="input-signup-pass-conf" placeholder="Repeat your password" oninput="validateConfirmPassword()">
+          <div class="field-error-msg" id="signup-conf-err">
+            <i class="fas fa-exclamation-circle"></i> <span id="signup-conf-err-text"></span>
+          </div>
+        </div>
+        <button class="action-btn" onclick="executeAuthentication('signup')">Get Started</button>
+        <div class="modal-footer-links">
+          <p>Already a member? <a class="link-text" onclick="switchModalUI('login')">Sign In</a></p>
+        </div>
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+      <div id="view-modal-forgot" class="hidden">
+        <h2 style="font-size:1.8rem;margin-bottom:10px;font-family:'Sora',sans-serif;">Reset Password</h2>
+        <p style="color:var(--text-gray);margin-bottom:30px;">We will send you a recovery link shortly.</p>
+        <div class="input-wrap">
+          <label>Registered Email</label>
+          <input type="email" id="input-forgot-email" placeholder="Enter your email" oninput="validateForgotEmail()">
+          <i class="email-status-icon" id="forgot-email-icon"></i>
+          <div class="field-error-msg" id="forgot-email-err">
+            <i class="fas fa-exclamation-circle"></i> <span id="forgot-email-err-text"></span>
+          </div>
+        </div>
+        <button class="action-btn" id="forgot-btn" onclick="processForgotPassword()">Send Recovery Link</button>
+        <div class="modal-footer-links">
+          <p><a class="link-text" onclick="switchModalUI('login')">Return to Login</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== JOB DETAIL MODAL ===================== -->
+  <div id="jobDetailModal" class="modal" onclick="closeJobDetail(event)">
+    <div class="modal-body" id="job-detail-content">
+      <!-- filled dynamically -->
+    </div>
+  </div>
+
+  <script>
+    // ===================== JOB DATA =====================
+    const MASTER_JOB_LIST = [
+      // Frontend / HTML / CSS Jobs
+      { id:101, title:"Web Architecture Consultant", company:"NIC – National Informatics Centre", budget:"₹85,000", budgetNum:85000, role:"Government", schedule:"FullTime", type:"Fixed", level:"Senior", mode:"Remote", tags:["HTTP","Client-Server","URL Structure","Status Codes"], desc:"Design and consult on client-server web architecture for government portals. You will work on request/response protocols, URL standards, and server status code handling." },
+      { id:102, title:"Website Planning Specialist", company:"EduSpark Technologies", budget:"₹48,000", budgetNum:48000, role:"Education", schedule:"PartTime", type:"Contract", level:"Mid", mode:"Remote", tags:["Web Planning","Navigation Design","Browser Compatibility","Page Layout"], desc:"Plan and design effective navigation structures and page layouts for e-learning platforms. Focus on browser compatibility, bandwidth optimization, and responsive look & feel." },
+      { id:103, title:"HTML Developer", company:"Zoho Corporation", budget:"₹32,000", budgetNum:32000, role:"Frontend", schedule:"PartTime", type:"Fixed", level:"Junior", mode:"Remote", tags:["HTML5","Page Structure","VS Code","Web Basics"], desc:"Build structured HTML pages for web applications. You will create semantic, well-organized HTML documents using modern editors and follow web standards." },
+      { id:104, title:"Semantic HTML Specialist", company:"Freshworks", budget:"₹60,000", budgetNum:60000, role:"Frontend", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Hybrid", tags:["Semantic HTML","Header & Footer","Meta Tags","SEO"], desc:"Implement semantic HTML5 tags for improved accessibility and SEO. Work on header, footer, main, section, and article tags to build well-structured, meaningful web pages." },
+      { id:105, title:"HTML Media Developer", company:"Byju's", budget:"₹42,000", budgetNum:42000, role:"Frontend", schedule:"PartTime", type:"Contract", level:"Junior", mode:"Remote", tags:["Images & Video","Audio Embed","Tables","iFrame"], desc:"Embed rich media into educational web pages including images, audio, video, and iframes. Build structured data tables with proper colspan and rowspan attributes." },
+      { id:106, title:"Web Forms Developer", company:"PhonePe", budget:"₹55,000", budgetNum:55000, role:"Frontend", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["HTML Forms","Input Validation","Form Attributes","User Input"], desc:"Design and build web forms for payment flows and user onboarding. Handle all input types including text, email, phone, date, and file uploads with proper validation attributes." },
+      { id:107, title:"SVG & Graphics Designer", company:"Infosys BPM", budget:"₹65,000", budgetNum:65000, role:"Agriculture", schedule:"PartTime", type:"Hourly", level:"Mid", mode:"Remote", tags:["SVG","Vector Graphics","Scalable Icons","Logo Design"], desc:"Create scalable vector graphics for data dashboards and reports. Design SVG shapes, icons, and logos that render cleanly at any screen resolution." },
+      { id:108, title:"Interactive Map Developer", company:"MapmyIndia", budget:"₹38,000", budgetNum:38000, role:"Frontend", schedule:"PartTime", type:"Contract", level:"Junior", mode:"Remote", tags:["Image Maps","HTML Map Tag","Clickable Areas","Navigation"], desc:"Build clickable HTML image maps for geographic web applications. Use map and area tags to create region-based interactive navigation elements." },
+      { id:109, title:"CSS Developer", company:"Razorpay", budget:"₹40,000", budgetNum:40000, role:"Frontend", schedule:"PartTime", type:"Contract", level:"Junior", mode:"Remote", tags:["CSS Types","Inline & External CSS","Stylesheet Priority","CSS Basics"], desc:"Apply CSS styles to web interfaces including inline, internal, and external stylesheets. Understand CSS specificity rules to manage style conflicts effectively." },
+      { id:110, title:"CSS Selectors & Styling Expert", company:"Swiggy", budget:"₹75,000", budgetNum:75000, role:"Frontend", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["CSS Selectors","Pseudo-class","Specificity","Class & ID Selectors"], desc:"Style complex UI components for food delivery web app using advanced CSS selectors. Implement ID, class, attribute, pseudo-class, and pseudo-element selectors with correct specificity." },
+      { id:111, title:"UI Stylist – Fonts & Backgrounds", company:"Nykaa", budget:"₹45,000", budgetNum:45000, role:"Healthcare", schedule:"PartTime", type:"Contract", level:"Junior", mode:"Remote", tags:["Background CSS","Google Fonts","Text Styling","Font Properties"], desc:"Style product pages with custom backgrounds, Google Fonts, and rich text properties. Apply background-image, text-shadow, font-weight, and letter-spacing for a polished visual experience." },
+      { id:112, title:"CSS Layout Developer", company:"Meesho", budget:"₹90,000", budgetNum:90000, role:"Frontend", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Hybrid", tags:["Flexbox","CSS Grid","Box Model","Positioning"], desc:"Build responsive e-commerce layouts using Flexbox and CSS Grid. Manage spacing with the box model and implement static, relative, absolute, and fixed positioning." },
+      { id:113, title:"CSS Animations Developer", company:"Groww", budget:"₹80,000", budgetNum:80000, role:"Finance", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["CSS Animations","Transitions","Transform","Gradients"], desc:"Create smooth UI animations and transitions for finance dashboards. Use keyframe animations, rotate/scale/translate transforms, and linear/radial gradients." },
+      { id:114, title:"Responsive Web Designer", company:"Ola Electric", budget:"₹88,000", budgetNum:88000, role:"Healthcare", schedule:"FullTime", type:"Fixed", level:"Senior", mode:"Remote", tags:["Media Queries","Responsive Design","CSS Variables","Mobile-First"], desc:"Build fully responsive web interfaces for mobile and desktop. Use CSS variables and media queries to adapt layouts for all screen sizes and device types." },
+      // Bootstrap Jobs
+      { id:115, title:"Bootstrap UI Developer", company:"Wipro Digital", budget:"₹62,000", budgetNum:62000, role:"Frontend", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["Bootstrap","Utility Classes","Containers","Bootstrap Icons"], desc:"Develop UI components using Bootstrap framework for enterprise web applications. Apply utility-first classes for spacing, colors, typography, and responsive containers." },
+      { id:116, title:"Bootstrap Grid Developer", company:"HCL Technologies", budget:"₹72,000", budgetNum:72000, role:"Management", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["Bootstrap Grid","Alerts","Buttons","Spinner"], desc:"Build responsive admin panel layouts using Bootstrap's 12-column grid system. Add alert messages, button variants, and loading spinners to management dashboards." },
+      { id:117, title:"Bootstrap Components Developer", company:"Tata Consultancy Services", budget:"₹58,000", budgetNum:58000, role:"Frontend", schedule:"PartTime", type:"Contract", level:"Mid", mode:"Hybrid", tags:["Dropdown","Cards","Collapse","Accordion"], desc:"Implement Bootstrap Dropdown, Card, Collapse, and Accordion components for interactive enterprise portals." },
+      { id:118, title:"Bootstrap Navigation Developer", company:"Cognizant", budget:"₹82,000", budgetNum:82000, role:"Management", schedule:"FullTime", type:"Contract", level:"Mid", mode:"Hybrid", tags:["Navbar","Carousel","Modal","Offcanvas"], desc:"Build responsive navigation systems using Bootstrap Navbar with dropdowns, Offcanvas sidebar, Modal dialogs, Carousel sliders, and Scrollspy for large management portals." },
+      { id:119, title:"Bootstrap Forms Developer", company:"Tech Mahindra", budget:"₹60,000", budgetNum:60000, role:"Frontend", schedule:"PartTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["Bootstrap Forms","Form Validation","Floating Labels","Pagination"], desc:"Create validated Bootstrap forms with floating labels for HR web platforms. Add pagination components for long data tables and record lists." },
+      // JavaScript Jobs
+      { id:120, title:"JavaScript Developer", company:"Amazon India", budget:"₹95,000", budgetNum:95000, role:"Backend", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["ES6","let & const","Array Methods","Template Literals"], desc:"Develop core JavaScript features for e-commerce product pages. Work with ES6 syntax, array methods like map, filter, and forEach, and template literals for dynamic content." },
+      { id:121, title:"JS Logic & Functions Developer", company:"Flipkart", budget:"₹85,000", budgetNum:85000, role:"Backend", schedule:"FullTime", type:"Hourly", level:"Mid", mode:"Remote", tags:["Arrow Functions","Loops","Spread & Rest","Default Parameters"], desc:"Write clean, modular JavaScript for Flipkart's search and filter features. Use arrow functions, all loop types, spread/rest operators, and default parameters." },
+      { id:122, title:"Frontend Interaction Developer", company:"MakeMyTrip", budget:"₹35,000", budgetNum:35000, role:"Frontend", schedule:"PartTime", type:"Contract", level:"Junior", mode:"Remote", tags:["Alert & Confirm","Prompt Box","User Interaction","JS Basics"], desc:"Add interactive JavaScript pop-up boxes to travel booking flows including Alert, Confirm, and Prompt dialogs for user confirmations and inputs." },
+      { id:123, title:"DOM Manipulation Developer", company:"Google India", budget:"₹1,10,000", budgetNum:110000, role:"Backend", schedule:"FullTime", type:"Fixed", level:"Senior", mode:"Remote", tags:["DOM", "querySelector","innerHTML","Style Manipulation"], desc:"Dynamically update web content using DOM manipulation for Google's developer tools. Use getElementById, querySelector, innerHTML, setAttribute, and style properties." },
+      { id:124, title:"JavaScript Events Developer", company:"Microsoft India", budget:"₹90,000", budgetNum:90000, role:"Frontend", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["Event Listeners","Click & Keyboard","event.target","preventDefault"], desc:"Build interactive event-driven web features for Microsoft productivity tools. Handle click, input, submit, keyboard events using addEventListener and the event object." },
+      { id:125, title:"Form Validation & Storage Developer", company:"HDFC Bank", budget:"₹70,000", budgetNum:70000, role:"Backend", schedule:"FullTime", type:"Contract", level:"Mid", mode:"Remote", tags:["Form Validation","Regex","localStorage","sessionStorage"], desc:"Implement secure client-side form validation for banking web forms using regex patterns. Manage session data with localStorage and sessionStorage." },
+      { id:126, title:"Async JavaScript Developer", company:"Paytm", budget:"₹1,00,000", budgetNum:100000, role:"Backend", schedule:"FullTime", type:"Fixed", level:"Senior", mode:"Remote", tags:["Promises","async & await","then & catch","Async JS"], desc:"Build asynchronous payment processing flows using JavaScript Promises and async/await syntax. Handle success and error states with .then(), .catch(), and .finally()." },
+      { id:127, title:"Fetch API Developer", company:"Zomato", budget:"₹1,15,000", budgetNum:115000, role:"Backend", schedule:"FullTime", type:"Fixed", level:"Senior", mode:"Remote", tags:["Fetch API","HTTP Requests","REST API","JSON Data"], desc:"Integrate external APIs for Zomato's restaurant and menu data using the Fetch API. Make HTTP GET/POST requests, handle JSON responses, and display dynamic data." },
+      // Sector-specific jobs
+      { id:128, title:"Government Portal Developer", company:"Digital India Corporation", budget:"₹92,000", budgetNum:92000, role:"Government", schedule:"FullTime", type:"Fixed", level:"Senior", mode:"Onsite", tags:["e-Governance","Accessible Web","WCAG","DOM Manipulation"], desc:"Develop WCAG-compliant government web portals with accessible DOM manipulation, keyboard navigation, and secure online form handling for citizen services." },
+      { id:129, title:"Patient Web App Developer", company:"Apollo Hospitals Digital", budget:"₹75,000", budgetNum:75000, role:"Healthcare", schedule:"FullTime", type:"Hourly", level:"Mid", mode:"Remote", tags:["Healthcare Forms","Patient Data","Form Validation","Storage"], desc:"Build patient-facing healthcare web apps with secure form validation, appointment booking flows, and HIPAA-compliant client-side data storage." },
+      { id:130, title:"Finance Dashboard Developer", company:"Zerodha", budget:"₹95,000", budgetNum:95000, role:"Finance", schedule:"FullTime", type:"Fixed", level:"Senior", mode:"Hybrid", tags:["Dashboard UI","CSS Grid","Flexbox","Data Tables"], desc:"Create interactive stock market dashboards using CSS Grid and Flexbox. Build data tables, charts layout, and responsive financial UI components for traders." },
+      { id:131, title:"Admin Panel Frontend Developer", company:"Juspay Technologies", budget:"₹82,000", budgetNum:82000, role:"Management", schedule:"FullTime", type:"Contract", level:"Mid", mode:"Remote", tags:["Admin Panel","CRUD UI","ES6","Array Operations"], desc:"Build management system admin panels with ES6 JavaScript, CRUD operation interfaces, and dynamic array-based data rendering." },
+      { id:132, title:"AgriTech Web Developer", company:"AgroStar", budget:"₹68,000", budgetNum:68000, role:"Agriculture", schedule:"PartTime", type:"Contract", level:"Mid", mode:"Remote", tags:["Fetch API","Weather API","Crop Data","Real-time Updates"], desc:"Build agricultural web portals that fetch live weather forecasts, crop prices, and field data from external APIs to help farmers make informed decisions." },
+      { id:133, title:"E-Learning Platform Developer", company:"Unacademy", budget:"₹88,000", budgetNum:88000, role:"Education", schedule:"FullTime", type:"Fixed", level:"Mid", mode:"Remote", tags:["Quiz App","Event Listeners","Progress Tracking","Interactive UI"], desc:"Develop interactive e-learning modules with quiz functionality, real-time score tracking, and event-driven student progress dashboards." },
+    ];
+
+    let GLOBAL_USER = JSON.parse(localStorage.getItem('nexus_active_user')) || null;
+    let APPLIED_JOBS = JSON.parse(localStorage.getItem('nexus_applications')) || [];
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showToast(message, type = 'default') {
+      const t = document.getElementById('toast');
+      t.className = 'toast';
+      if (type === 'success') t.classList.add('success-toast');
+      if (type === 'error') t.classList.add('error-toast');
+      t.textContent = message;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function isValidEmail(email) {
+      const re = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+      return re.test(String(email).toLowerCase());
+    }
+    function getEmailError(email) {
+      if (!email) return 'Email cannot be empty.';
+      if (!email.includes('@')) return '"@" symbol is required.';
+      const parts = email.split('@');
+      if (parts[0].length < 1) return 'Email name cannot be empty.';
+      if (!parts[1] || !parts[1].includes('.')) return 'Add a valid domain (e.g. gmail.com).';
+      const ext = parts[1].split('.');
+      if (ext[ext.length-1].length < 2) return 'Invalid extension (.com .in .net).';
+      if (!isValidEmail(email)) return 'Invalid format (example@domain.com).';
+      return null;
+    }
+    function getPasswordChecks(pass) {
+      return {
+        length: pass.length >= 8,
+        upper: /[A-Z]/.test(pass),
+        lower: /[a-z]/.test(pass),
+        number: /[0-9]/.test(pass),
+        special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(pass)
+      };
+    }
+    function getPasswordStrength(checks) {
+      const passed = Object.values(checks).filter(Boolean).length;
+      if (passed <= 1) return { label:'Very Weak', color:'#ef4444', width:'20%' };
+      if (passed === 2) return { label:'Weak', color:'#f59e0b', width:'40%' };
+      if (passed === 3) return { label:'Fair', color:'#f59e0b', width:'60%' };
+      if (passed === 4) return { label:'Strong', color:'#10b981', width:'80%' };
+      return { label:'Very Strong 💪', color:'#059669', width:'100%' };
+    }
+    function setInputState(inp, errDiv, errText, icon, errorMsg, valid) {
+      if (valid === null) {
+        inp.className = '';
+        if (errDiv) errDiv.classList.remove('show');
+        if (icon) { icon.style.display='none'; icon.innerHTML=''; }
+        return;
+      }
+      if (valid) {
+        inp.classList.add('input-valid'); inp.classList.remove('input-error');
+        if (errDiv) errDiv.classList.remove('show');
+        if (icon) { icon.style.display='block'; icon.innerHTML='<i class="fas fa-check-circle" style="color:var(--success);"></i>'; }
+      } else {
+        inp.classList.add('input-error'); inp.classList.remove('input-valid');
+        if (errDiv && errText) { errText.textContent=errorMsg; errDiv.classList.add('show'); }
+        if (icon) { icon.style.display='block'; icon.innerHTML='<i class="fas fa-times-circle" style="color:var(--danger);"></i>'; }
+      }
+    }
+    function updateCheckItem(id, isPassed) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const icon = el.querySelector('.check-icon');
+      el.className = 'check-item ' + (isPassed ? 'pass' : 'fail');
+      icon.innerHTML = isPassed ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>';
+    }
+
+    function validateLoginEmail() {
+      const val = document.getElementById('input-login-email').value.trim();
+      const inp = document.getElementById('input-login-email');
+      const errDiv = document.getElementById('login-email-err');
+      const errText = document.getElementById('login-email-err-text');
+      const icon = document.getElementById('login-email-icon');
+      if (!val) { setInputState(inp,errDiv,errText,icon,null,null); return; }
+      const err = getEmailError(val);
+      err ? setInputState(inp,errDiv,errText,icon,err,false) : setInputState(inp,errDiv,errText,icon,null,true);
+    }
+    function validateLoginPassword() {
+      const val = document.getElementById('input-login-pass').value;
+      const inp = document.getElementById('input-login-pass');
+      const strengthWrap = document.getElementById('login-strength-wrap');
+      const strengthBar = document.getElementById('login-strength-bar');
+      const strengthText = document.getElementById('login-strength-text');
+      const checklist = document.getElementById('login-pass-checklist');
+      const errDiv = document.getElementById('login-pass-err');
+      if (!val) { strengthWrap.classList.remove('show'); checklist.classList.remove('show'); inp.className = ''; errDiv.classList.remove('show'); return; }
+      strengthWrap.classList.add('show'); checklist.classList.add('show');
+      const checks = getPasswordChecks(val);
+      updateCheckItem('l-chk-len', checks.length); updateCheckItem('l-chk-upper', checks.upper);
+      updateCheckItem('l-chk-lower', checks.lower); updateCheckItem('l-chk-num', checks.number);
+      updateCheckItem('l-chk-special', checks.special);
+      const strength = getPasswordStrength(checks);
+      strengthBar.style.width = strength.width; strengthBar.style.background = strength.color;
+      strengthText.textContent = 'Password Strength: ' + strength.label; strengthText.style.color = strength.color;
+      const allPassed = Object.values(checks).every(Boolean);
+      if (allPassed) { inp.classList.add('input-valid'); inp.classList.remove('input-error'); errDiv.classList.remove('show'); }
+      else { inp.classList.add('input-error'); inp.classList.remove('input-valid'); }
+    }
+    function validateSignupName() {
+      const val = document.getElementById('input-signup-name').value.trim();
+      const inp = document.getElementById('input-signup-name');
+      const errDiv = document.getElementById('signup-name-err');
+      const errText = document.getElementById('signup-name-err-text');
+      if (!val) { inp.className=''; errDiv.classList.remove('show'); return; }
+      if (val.length < 2) { inp.classList.add('input-error'); inp.classList.remove('input-valid'); errText.textContent = 'Name must be at least 2 characters.'; errDiv.classList.add('show'); }
+      else if (!/^[a-zA-Z\s]+$/.test(val)) { inp.classList.add('input-error'); inp.classList.remove('input-valid'); errText.textContent = 'Name can only contain letters (A–Z, a–z).'; errDiv.classList.add('show'); }
+      else { inp.classList.add('input-valid'); inp.classList.remove('input-error'); errDiv.classList.remove('show'); }
+    }
+    function validateSignupEmail() {
+      const val = document.getElementById('input-signup-email').value.trim();
+      const inp = document.getElementById('input-signup-email');
+      const errDiv = document.getElementById('signup-email-err');
+      const errText = document.getElementById('signup-email-err-text');
+      const icon = document.getElementById('signup-email-icon');
+      if (!val) { setInputState(inp,errDiv,errText,icon,null,null); return; }
+      const err = getEmailError(val);
+      err ? setInputState(inp,errDiv,errText,icon,err,false) : setInputState(inp,errDiv,errText,icon,null,true);
+    }
+    function validateSignupPassword() {
+      const val = document.getElementById('input-signup-pass').value;
+      const inp = document.getElementById('input-signup-pass');
+      const strengthWrap = document.getElementById('strength-wrap');
+      const strengthBar = document.getElementById('strength-bar');
+      const strengthText = document.getElementById('strength-text');
+      const checklist = document.getElementById('pass-checklist');
+      if (!val) { strengthWrap.classList.remove('show'); checklist.classList.remove('show'); inp.className = ''; validateConfirmPassword(); return; }
+      strengthWrap.classList.add('show'); checklist.classList.add('show');
+      const checks = getPasswordChecks(val);
+      updateCheckItem('chk-len', checks.length); updateCheckItem('chk-upper', checks.upper);
+      updateCheckItem('chk-lower', checks.lower); updateCheckItem('chk-num', checks.number);
+      updateCheckItem('chk-special', checks.special);
+      const strength = getPasswordStrength(checks);
+      strengthBar.style.width = strength.width; strengthBar.style.background = strength.color;
+      strengthText.textContent = 'Password Strength: ' + strength.label; strengthText.style.color = strength.color;
+      const allPassed = Object.values(checks).every(Boolean);
+      if (allPassed) { inp.classList.add('input-valid'); inp.classList.remove('input-error'); }
+      else { inp.classList.add('input-error'); inp.classList.remove('input-valid'); }
+      validateConfirmPassword();
+    }
+    function validateConfirmPassword() {
+      const pass = document.getElementById('input-signup-pass').value;
+      const conf = document.getElementById('input-signup-pass-conf').value;
+      const inp = document.getElementById('input-signup-pass-conf');
+      const errDiv = document.getElementById('signup-conf-err');
+      const errText = document.getElementById('signup-conf-err-text');
+      if (!conf) { inp.className=''; errDiv.classList.remove('show'); return; }
+      if (pass !== conf) { inp.classList.add('input-error'); inp.classList.remove('input-valid'); errText.textContent = 'Passwords do not match.'; errDiv.classList.add('show'); }
+      else { inp.classList.add('input-valid'); inp.classList.remove('input-error'); errDiv.classList.remove('show'); }
+    }
+    function validateForgotEmail() {
+      const val = document.getElementById('input-forgot-email').value.trim();
+      const inp = document.getElementById('input-forgot-email');
+      const errDiv = document.getElementById('forgot-email-err');
+      const errText = document.getElementById('forgot-email-err-text');
+      const icon = document.getElementById('forgot-email-icon');
+      if (!val) { setInputState(inp,errDiv,errText,icon,null,null); return; }
+      const err = getEmailError(val);
+      err ? setInputState(inp,errDiv,errText,icon,err,false) : setInputState(inp,errDiv,errText,icon,null,true);
+    }
+
+    function executeAuthentication(type) {
+      if (type === 'signup') {
+        const name = document.getElementById('input-signup-name').value.trim();
+        const email = document.getElementById('input-signup-email').value.trim();
+        const pass = document.getElementById('input-signup-pass').value;
+        const conf = document.getElementById('input-signup-pass-conf').value;
+        if (!name || name.length < 2) { showToast('⚠️ Name must be at least 2 characters.', 'error'); return; }
+        if (!/^[a-zA-Z\s]+$/.test(name)) { showToast('⚠️ Name can only have letters.', 'error'); return; }
+        const emailErr = getEmailError(email);
+        if (emailErr) { showToast('⚠️ ' + emailErr, 'error'); return; }
+        const checks = getPasswordChecks(pass);
+        if (!checks.length) { showToast('⚠️ Password must be at least 8 characters.', 'error'); return; }
+        if (!checks.upper) { showToast('⚠️ Password needs 1 Uppercase letter (A–Z).', 'error'); return; }
+        if (!checks.lower) { showToast('⚠️ Password needs 1 Lowercase letter (a–z).', 'error'); return; }
+        if (!checks.number) { showToast('⚠️ Password needs 1 Number (0–9).', 'error'); return; }
+        if (!checks.special) { showToast('⚠️ Password needs 1 Special character (!@#$).', 'error'); return; }
+        if (pass !== conf) { showToast('⚠️ Passwords do not match.', 'error'); return; }
+        GLOBAL_USER = { fullName: name, email: email, profileImage: null };
+      } else {
+        const email = document.getElementById('input-login-email').value.trim();
+        const pass = document.getElementById('input-login-pass').value;
+        const emailErr = getEmailError(email);
+        if (emailErr) { showToast('⚠️ ' + emailErr, 'error'); return; }
+        if (!pass) { showToast('⚠️ Password cannot be empty.', 'error'); return; }
+        const checks = getPasswordChecks(pass);
+        if (!checks.length) { showToast('⚠️ Password must be at least 8 characters.', 'error'); return; }
+        if (!checks.upper) { showToast('⚠️ Password needs 1 Uppercase letter (A–Z).', 'error'); return; }
+        if (!checks.lower) { showToast('⚠️ Password needs 1 Lowercase letter (a–z).', 'error'); return; }
+        if (!checks.number) { showToast('⚠️ Password needs 1 Number (0–9).', 'error'); return; }
+        if (!checks.special) { showToast('⚠️ Password needs 1 Special character (!@#$).', 'error'); return; }
+        GLOBAL_USER = { fullName: email.split('@')[0], email: email, profileImage: null };
+      }
+      localStorage.setItem('nexus_active_user', JSON.stringify(GLOBAL_USER));
+      showToast('✅ Login successful!', 'success');
+      setTimeout(() => { closeModal(); location.reload(); }, 1000);
+    }
+
+    function processForgotPassword() {
+      const email = document.getElementById('input-forgot-email').value.trim();
+      const err = getEmailError(email);
+      if (err) { showToast('⚠️ ' + err, 'error'); return; }
+      const btn = document.getElementById('forgot-btn');
+      btn.innerText = 'Processing...'; btn.disabled = true;
+      setTimeout(() => {
+        showToast('✅ Recovery link sent to ' + email + '!', 'success');
+        btn.innerText = 'Send Recovery Link'; btn.disabled = false;
+        switchModalUI('login');
+      }, 2000);
+    }
+
+    function initializeApp() {
+      if (GLOBAL_USER) {
+        document.getElementById('nav-guest').classList.add('hidden');
+        document.getElementById('nav-user').classList.remove('hidden');
+        document.getElementById('display-name').innerText = GLOBAL_USER.fullName || 'User';
+        document.getElementById('welcome-name').innerText = GLOBAL_USER.fullName || 'User';
+        document.getElementById('badge').innerText = APPLIED_JOBS.length;
+        document.getElementById('total-applied-count').innerText = APPLIED_JOBS.length;
+        syncAvatars(GLOBAL_USER.profileImage);
+      } else {
+        document.getElementById('nav-guest').classList.remove('hidden');
+        document.getElementById('nav-user').classList.add('hidden');
+      }
+      renderJobGrid();
+    }
+
+    let activeRole = 'all';
+    function setRoleFilter(el) {
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      activeRole = el.dataset.role;
+      filterJobs();
+    }
+    function updateBudgetSlider(slider) {
+      const val = parseInt(slider.value);
+      const pct = ((val - 15000) / (120000 - 15000)) * 100;
+      slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${pct}%, #e2e8f0 ${pct}%)`;
+      if (val >= 120000) {
+        document.getElementById('budget-display').textContent = 'Any';
+      } else if (val >= 100000) {
+        document.getElementById('budget-display').textContent = '₹' + (val/100000).toFixed(1) + 'L';
+      } else {
+        document.getElementById('budget-display').textContent = '₹' + (val/1000).toFixed(0) + 'K';
+      }
+    }
+    function getCheckedValues(className) {
+      return [...document.querySelectorAll('.' + className + ':checked')].map(el => el.value);
+    }
+    function renderActiveFilterTags() {
+      const wrap = document.getElementById('active-filter-tags');
+      wrap.innerHTML = '';
+      const tags = [];
+      const roleLabels = { Frontend:'Frontend', Backend:'Backend', Government:'Govt / Public', Healthcare:'Healthcare', Finance:'Finance', Management:'Management', Agriculture:'Agriculture', Education:'Education' };
+      if (activeRole !== 'all') tags.push({ label: '💼 ' + (roleLabels[activeRole] || activeRole), clear: () => document.querySelector('.cat-pill[data-role="all"]').click() });
+      getCheckedValues('type-filter').forEach(v => tags.push({ label:'Salary: '+v, clear: () => { document.querySelector('.type-filter[value="'+v+'"]').checked=false; filterJobs(); }}));
+      getCheckedValues('schedule-filter').forEach(v => tags.push({ label: v === 'FullTime' ? '🕐 Full Time' : '🕐 Part Time', clear: () => { document.querySelector('.schedule-filter[value="'+v+'"]').checked=false; filterJobs(); }}));
+      getCheckedValues('level-filter').forEach(v => tags.push({ label:'Level: '+v, clear: () => { document.querySelector('.level-filter[value="'+v+'"]').checked=false; filterJobs(); }}));
+      getCheckedValues('mode-filter').forEach(v => tags.push({ label: v, clear: () => { document.querySelector('.mode-filter[value="'+v+'"]').checked=false; filterJobs(); }}));
+      const budget = parseInt(document.getElementById('budget-slider').value);
+      if (budget < 120000) {
+        const label = budget >= 100000 ? '₹' + (budget/100000).toFixed(1) + 'L' : '₹' + (budget/1000).toFixed(0) + 'K';
+        tags.push({ label:'Salary ≤ ' + label, clear: () => { document.getElementById('budget-slider').value=120000; updateBudgetSlider(document.getElementById('budget-slider')); filterJobs(); }});
+      }
+      const search = document.getElementById('search-bar').value.trim();
+      if (search) tags.push({ label:'"'+search+'"', clear: () => { document.getElementById('search-bar').value=''; filterJobs(); }});
+      tags.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'filter-tag';
+        div.innerHTML = t.label + ' <button>✕</button>';
+        div.querySelector('button').addEventListener('click', () => t.clear());
+        wrap.appendChild(div);
+      });
+    }
+    function clearAllFilters() {
+      document.querySelector('.cat-pill[data-role="all"]').click();
+      document.querySelectorAll('.type-filter, .level-filter, .mode-filter, .schedule-filter').forEach(el => el.checked=false);
+      document.getElementById('budget-slider').value = 120000;
+      updateBudgetSlider(document.getElementById('budget-slider'));
+      document.getElementById('search-bar').value = '';
+      document.getElementById('sort-select').value = 'default';
+      filterJobs();
+    }
+
+    function renderJobGrid() {
+      const grid = document.getElementById('job-container');
+      const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+      const budgetMax = parseInt(document.getElementById('budget-slider').value);
+      const typeFilters = getCheckedValues('type-filter');
+      const levelFilters = getCheckedValues('level-filter');
+      const modeFilters = getCheckedValues('mode-filter');
+      const scheduleFilters = getCheckedValues('schedule-filter');
+      const sortBy = document.getElementById('sort-select').value;
+      grid.innerHTML = '';
+      let filtered = MASTER_JOB_LIST.filter(job => {
+        const matchSearch = !searchTerm || job.title.toLowerCase().includes(searchTerm) || job.desc.toLowerCase().includes(searchTerm) || job.tags.some(t => t.toLowerCase().includes(searchTerm)) || job.company.toLowerCase().includes(searchTerm);
+        const matchRole = activeRole === 'all' || job.role === activeRole;
+        const matchType = typeFilters.length === 0 || typeFilters.includes(job.type);
+        const matchLevel = levelFilters.length === 0 || levelFilters.includes(job.level);
+        const matchMode = modeFilters.length === 0 || modeFilters.includes(job.mode);
+        const matchSchedule = scheduleFilters.length === 0 || scheduleFilters.includes(job.schedule);
+        const matchBudget = job.budgetNum <= budgetMax;
+        return matchSearch && matchRole && matchType && matchLevel && matchMode && matchSchedule && matchBudget;
+      });
+      if (sortBy === 'budget-high') filtered.sort((a,b) => b.budgetNum - a.budgetNum);
+      else if (sortBy === 'budget-low') filtered.sort((a,b) => a.budgetNum - b.budgetNum);
+      else if (sortBy === 'newest') filtered.sort((a,b) => b.id - a.id);
+      document.getElementById('results-num').textContent = filtered.length;
+      renderActiveFilterTags();
+      const levelColor = { Junior:'#e0f2fe:#0284c7', Mid:'#fef3c7:#d97706', Senior:'#dcfce7:#16a34a' };
+      const modeIcon = { Remote:'fa-globe', Hybrid:'fa-building', Onsite:'fa-map-marker-alt' };
+      const typeColor = { Fixed:'#eff6ff:#2563eb', Hourly:'#fdf4ff:#7c3aed', Contract:'#fff7ed:#ea580c' };
+      const roleLabel = { Frontend:'💻 Frontend', Backend:'⚙️ Backend', Government:'🏛️ Govt / Public', Healthcare:'🏥 Healthcare', Finance:'📈 Finance', Management:'📋 Management', Agriculture:'🌱 Agriculture', Education:'🎓 Education' };
+      const roleColor = { Frontend:'#eff6ff:#2563eb', Backend:'#f0fdf4:#16a34a', Government:'#f8fafc:#475569', Healthcare:'#fff1f2:#be123c', Finance:'#fefce8:#854d0e', Management:'#f0f9ff:#0369a1', Agriculture:'#f0fdf4:#15803d', Education:'#fdf4ff:#7c3aed' };
+      const schedLabel = { FullTime:'🕐 Full Time', PartTime:'🕐 Part Time' };
+      filtered.forEach(job => {
+        const hasApplied = APPLIED_JOBS.find(app => app.id === job.id);
+        const btnLabel = (GLOBAL_USER && hasApplied) ? 'Applied ✓' : 'Apply for Job';
+        const btnStyle = (GLOBAL_USER && hasApplied) ? 'apply-btn applied' : 'apply-btn';
+        const [lvlBg, lvlTxt] = (levelColor[job.level] || '#f1f5f9:#64748b').split(':');
+        const [typeBg, typeTxt] = (typeColor[job.type] || '#f1f5f9:#64748b').split(':');
+        const [roleBg, roleTxt] = (roleColor[job.role] || '#f1f5f9:#64748b').split(':');
+        const icon = modeIcon[job.mode] || 'fa-globe';
+        const schedBg = job.schedule === 'FullTime' ? '#ecfdf5' : '#fff7ed';
+        const schedTxt = job.schedule === 'FullTime' ? '#065f46' : '#92400e';
+        grid.innerHTML += `
+          <article class="job-card">
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <span style="background:${roleBg};color:${roleTxt};font-size:0.68rem;font-weight:800;padding:3px 8px;border-radius:4px;">${roleLabel[job.role] || job.role}</span>
+                <span style="background:${schedBg};color:${schedTxt};font-size:0.68rem;font-weight:800;padding:3px 8px;border-radius:4px;">${schedLabel[job.schedule] || job.schedule}</span>
+              </div>
+              <h3 class="job-title">${job.title}</h3>
+              <div class="company-name"><i class="fas fa-building" style="color:var(--primary);font-size:0.75rem;"></i>${job.company}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+                <span style="background:${typeBg};color:${typeTxt};font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:4px;">${job.type}</span>
+                <span style="background:${lvlBg};color:${lvlTxt};font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:4px;">${job.level}</span>
+                <span style="background:#f1f5f9;color:var(--text-gray);font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:4px;"><i class="fas ${icon}" style="margin-right:4px;"></i>${job.mode}</span>
+              </div>
+              <div class="job-budget">${job.budget}/month</div>
+              <p style="font-size:0.88rem;color:var(--text-gray);line-height:1.5;margin-bottom:12px;">${job.desc}</p>
+              <div class="job-tag-list">${job.tags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:auto;">
+              <button class="${btnStyle}" style="flex:1;" onclick="handleJobApplication(${job.id})">${btnLabel}</button>
+              <button onclick="openJobDetail(${job.id})" style="padding:0.8rem 1rem;border:1px solid var(--border);background:white;border-radius:8px;cursor:pointer;font-weight:600;transition:0.2s;color:var(--dark);white-space:nowrap;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
+                <i class="fas fa-eye" style="margin-right:5px;color:var(--primary);"></i>Details
+              </button>
+            </div>
+          </article>`;
+      });
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:60px 20px;">
+            <div style="font-size:2.5rem;margin-bottom:16px;">🔍</div>
+            <h3 style="font-family:'Sora',sans-serif;margin-bottom:8px;">No jobs found</h3>
+            <p style="color:var(--text-gray);font-size:0.9rem;">Try adjusting your filters or clearing the search.</p>
+            <button onclick="clearAllFilters()" style="margin-top:16px;padding:10px 24px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Reset Filters</button>
+          </div>`;
+      }
+    }
+    function filterJobs() { renderJobGrid(); }
+
+    function handleJobApplication(jobId) {
+      if (!GLOBAL_USER) { openModal('login'); return; }
+      if (APPLIED_JOBS.find(a => a.id === jobId)) return;
+      const randomStatus = (APPLIED_JOBS.length % 3 === 0) ? 'Interview' : 'Pending';
+      APPLIED_JOBS.push({ id: jobId, timestamp: Date.now(), status: randomStatus });
+      localStorage.setItem('nexus_applications', JSON.stringify(APPLIED_JOBS));
+      showToast('✅ Application submitted!', 'success');
+      initializeApp();
+    }
+
+    function openJobDetail(jobId) {
+      const job = MASTER_JOB_LIST.find(j => j.id === jobId);
+      if (!job) return;
+      const hasApplied = GLOBAL_USER && APPLIED_JOBS.find(a => a.id === job.id);
+      const levelColor = { Junior:'#e0f2fe:#0284c7', Mid:'#fef3c7:#d97706', Senior:'#dcfce7:#16a34a' };
+      const roleLabel = { Frontend:'💻 Frontend', Backend:'⚙️ Backend', Government:'🏛️ Govt / Public', Healthcare:'🏥 Healthcare', Finance:'📈 Finance', Management:'📋 Management', Agriculture:'🌱 Agriculture', Education:'🎓 Education' };
+      const roleColor = { Frontend:'#eff6ff:#2563eb', Backend:'#f0fdf4:#16a34a', Government:'#f8fafc:#475569', Healthcare:'#fff1f2:#be123c', Finance:'#fefce8:#854d0e', Management:'#f0f9ff:#0369a1', Agriculture:'#f0fdf4:#15803d', Education:'#fdf4ff:#7c3aed' };
+      const modeIcon = { Remote:'🌐', Hybrid:'🏢', Onsite:'📍' };
+      const typeColor = { Fixed:'#eff6ff:#2563eb', Hourly:'#fdf4ff:#7c3aed', Contract:'#fff7ed:#ea580c' };
+      const [lvlBg, lvlTxt] = (levelColor[job.level] || '#f1f5f9:#64748b').split(':');
+      const [typeBg, typeTxt] = (typeColor[job.type] || '#f1f5f9:#64748b').split(':');
+      const [roleBg, roleTxt] = (roleColor[job.role] || '#f1f5f9:#64748b').split(':');
+      const schedLabel = job.schedule === 'FullTime' ? '🕐 Full Time' : '🕐 Part Time';
+      const applyBtnHTML = hasApplied
+        ? `<button class="detail-apply-btn applied"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Already Applied</button>`
+        : `<button class="detail-apply-btn" onclick="applyFromDetail(${job.id})"><i class="fas fa-paper-plane" style="margin-right:8px;"></i>Apply for Job</button>`;
+      document.getElementById('job-detail-content').innerHTML = `
+        <span style="position:absolute;top:20px;right:20px;cursor:pointer;font-size:1.1rem;color:var(--text-gray);" onclick="closeJobDetailModal()"><i class="fas fa-times"></i></span>
+        <div class="detail-header">
+          <div class="detail-title">${job.title}</div>
+          <div class="detail-company"><i class="fas fa-building" style="color:var(--primary);"></i>${job.company}</div>
+          <div class="detail-badges">
+            <span class="detail-badge" style="background:${roleBg};color:${roleTxt};">${roleLabel[job.role] || job.role}</span>
+            <span class="detail-badge" style="background:${typeBg};color:${typeTxt};">${job.type}</span>
+            <span class="detail-badge" style="background:${lvlBg};color:${lvlTxt};">${job.level}</span>
+            <span class="detail-badge" style="background:#f1f5f9;color:var(--text-gray);">${modeIcon[job.mode] || ''} ${job.mode}</span>
+          </div>
+        </div>
+        <div class="detail-budget-block">
+          <div>
+            <div class="detail-budget-amount">${job.budget}</div>
+            <div class="detail-budget-label">per month · ${job.type === 'Hourly' ? 'Hourly Rate' : job.type === 'Contract' ? 'Contract' : 'Fixed Salary'}</div>
+          </div>
+          <i class="fas fa-rupee-sign" style="font-size:2rem;color:#a7f3d0;margin-left:auto;"></i>
+        </div>
+        <div class="detail-info-grid" style="margin-bottom:1.5rem;">
+          <div class="detail-info-item">
+            <div class="detail-info-key">Job Type</div>
+            <div class="detail-info-val">${roleLabel[job.role] || job.role}</div>
+          </div>
+          <div class="detail-info-item">
+            <div class="detail-info-key">Employment</div>
+            <div class="detail-info-val">${schedLabel}</div>
+          </div>
+          <div class="detail-info-item">
+            <div class="detail-info-key">Experience Level</div>
+            <div class="detail-info-val">${job.level}</div>
+          </div>
+          <div class="detail-info-item">
+            <div class="detail-info-key">Work Mode</div>
+            <div class="detail-info-val">${modeIcon[job.mode] || ''} ${job.mode}</div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">📋 Job Description</div>
+          <p class="detail-desc">${job.desc}</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">🏷️ Key Skills</div>
+          <div class="detail-tags">${job.tags.map(t => `<span class="detail-tag">${escapeHtml(t)}</span>`).join('')}</div>
+        </div>
+        <div class="detail-actions">
+          ${applyBtnHTML}
+          <button class="detail-close-btn" onclick="closeJobDetailModal()">Close</button>
+        </div>
+      `;
+      document.getElementById('jobDetailModal').style.display = 'flex';
+    }
+    function applyFromDetail(jobId) {
+      handleJobApplication(jobId);
+      setTimeout(() => openJobDetail(jobId), 100);
+    }
+    function closeJobDetailModal() { document.getElementById('jobDetailModal').style.display = 'none'; }
+    function closeJobDetail(e) { if (e.target === document.getElementById('jobDetailModal')) closeJobDetailModal(); }
+
+    function removeApplication(jobId) {
+      APPLIED_JOBS = APPLIED_JOBS.filter(a => a.id !== jobId);
+      localStorage.setItem('nexus_applications', JSON.stringify(APPLIED_JOBS));
+      document.getElementById('badge').innerText = APPLIED_JOBS.length;
+      document.getElementById('total-applied-count').innerText = APPLIED_JOBS.length;
+      showToast('🗑️ Application removed.', 'default');
+      renderAppliedJobs();
+      renderJobGrid();
+    }
+
+    function renderAppliedJobs() {
+      const list = document.getElementById('applied-jobs-grid');
+      list.innerHTML = '';
+      if (APPLIED_JOBS.length === 0) {
+        list.innerHTML = '<div style="grid-column:1/-1;padding:60px 20px;text-align:center;color:var(--text-gray);"><div style="font-size:2.5rem;margin-bottom:16px;">📭</div><p style="font-weight:600;font-size:1rem;">No applications yet.</p><p style="font-size:0.88rem;margin-top:6px;">Go to Home and apply for jobs.</p></div>';
+        return;
+      }
+      APPLIED_JOBS.forEach(application => {
+        const job = MASTER_JOB_LIST.find(j => j.id === application.id);
+        if (job) {
+          const statusClass = application.status === 'Interview' ? 'pill-interview' : 'pill-pending';
+          const roleLabels = { Frontend:'💻 Frontend', Backend:'⚙️ Backend', Government:'🏛️ Govt', Healthcare:'🏥 Healthcare', Finance:'📈 Finance', Management:'📋 Management', Agriculture:'🌱 Agriculture', Education:'🎓 Education' };
+          list.innerHTML += `
+            <div class="job-card">
+              <span class="status-pill ${statusClass}">${application.status}</span>
+              <div>
+                <h3 class="job-title">${job.title}</h3>
+                <div class="company-name"><i class="fas fa-building" style="color:var(--primary);font-size:0.75rem;"></i>${job.company}</div>
+                <div class="job-budget">${job.budget}/month</div>
+                <p style="font-size:0.82rem;color:#64748b;margin-bottom:4px;"><i class="fas fa-tag" style="margin-right:4px;color:var(--primary);"></i>${roleLabels[job.role] || job.role} &nbsp;•&nbsp; ${job.schedule === 'FullTime' ? '🕐 Full Time' : '🕐 Part Time'}</p>
+                <p style="font-size:0.82rem;color:gray;"><i class="fas fa-calendar-alt" style="margin-right:4px;"></i>Applied: ${new Date(application.timestamp).toLocaleDateString()}</p>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:15px;">
+                <button class="apply-btn" style="flex:1;background:var(--dark);color:white;border:none;" onclick="openJobDetail(${job.id})">
+                  <i class="fas fa-eye" style="margin-right:6px;"></i>View Details
+                </button>
+                <button onclick="removeApplication(${job.id})" style="padding:0.8rem 1rem;border:1.5px solid #fecaca;background:#fff5f5;border-radius:8px;cursor:pointer;font-weight:600;color:#dc2626;transition:0.2s;white-space:nowrap;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff5f5'" title="Remove Application">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>`;
+        }
+      });
+    }
+
+    function processImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        GLOBAL_USER.profileImage = e.target.result;
+        localStorage.setItem('nexus_active_user', JSON.stringify(GLOBAL_USER));
+        syncAvatars(e.target.result);
+        showToast('✅ Profile photo updated!', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+    function syncAvatars(source) {
+      const navAvatar = document.getElementById('nav-profile-pic');
+      const dashAvatar = document.getElementById('dashboard-big-avatar');
+      const html = source ? `<img src="${source}">` : (GLOBAL_USER?.fullName ? GLOBAL_USER.fullName[0].toUpperCase() : 'U');
+      if (navAvatar) navAvatar.innerHTML = html;
+      if (dashAvatar) dashAvatar.innerHTML = html;
+    }
+    function togglePasswordVisibility(fieldId) {
+      const field = document.getElementById(fieldId);
+      field.type = (field.type === 'password') ? 'text' : 'password';
+    }
+    function switchModalUI(view) {
+      ['login','signup','forgot'].forEach(v => document.getElementById('view-modal-'+v).classList.add('hidden'));
+      document.getElementById('view-modal-'+view).classList.remove('hidden');
+    }
+    function handleNavigation(target) {
+      if (!GLOBAL_USER && target !== 'home') { openModal('login'); return; }
+      ['home','dashboard','myjobs'].forEach(s => document.getElementById('view-'+s).classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      document.getElementById('view-'+target).classList.add('active');
+      const links = document.querySelectorAll('.nav-link');
+      if (target === 'home') links[0].classList.add('active');
+      if (target === 'dashboard') links[1].classList.add('active');
+      if (target === 'myjobs') { links[2].classList.add('active'); renderAppliedJobs(); }
+    }
+    function openModal(view = 'login') { switchModalUI(view); document.getElementById('authModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('authModal').style.display = 'none'; }
+    function toggleDropdown(e) {
+      e.stopPropagation();
+      const d = document.getElementById('profile-dropdown');
+      d.style.display = (d.style.display === 'flex') ? 'none' : 'flex';
+    }
+    function hideDropdowns() { document.getElementById('profile-dropdown').style.display = 'none'; }
+    function processLogout() { localStorage.removeItem('nexus_active_user'); location.reload(); }
+    window.onload = initializeApp;
+  </script>
+</body>
+</html>
